@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<!-- CSP phòng thủ chiều sâu: chặn script ngoài + giới hạn nơi được gửi dữ liệu (chống exfil).
+     Cho phép: self · Google Fonts (CSS+font) · GoatCounter beacon (analytics.js) · data: (favicon SVG).
+     'unsafe-inline' script cần cho khối đăng ký SW inline ở cuối trang; app không có JS ngoài nào.
+     Lưu ý: frame-ancestors phải đặt qua HTTP header (GitHub Pages không set được) nên bỏ ở meta. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://longnhi.goatcounter.com; connect-src 'self' https://longnhi.goatcounter.com; frame-src https://www.youtube-nocookie.com https://www.youtube.com; manifest-src 'self'; worker-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Học cùng Nhí 🐉 — Bé học tiếng Anh với Long Nhí</title>
+<meta name="description" content="Bé 3–7 tuổi ôn từ vựng và phonics tiếng Anh cùng rồng con Long Nhí — flashcard, trò chơi nghe-chọn, quiz theo từng tập phim.">
+<meta name="theme-color" content="#A8DCD9">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Học cùng Nhí">
+<meta property="og:title" content="Học cùng Nhí — Bé học tiếng Anh với Long Nhí 🐉">
+<meta property="og:description" content="Miễn phí: bé 3–7 tuổi ôn từ vựng & phonics tiếng Anh theo từng tập phim Long Nhí.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐉</text></svg>">
+</head>
+<body>
+  <!-- nền làng Cỏ Xanh: trời mint + đồi lúa + mặt trời -->
+  <div class="scenery" aria-hidden="true">
+    <div class="sun"></div>
+    <div class="cloud cloud-1">☁️</div>
+    <div class="cloud cloud-2">☁️</div>
+    <div class="hill hill-back"></div>
+    <div class="hill hill-front"></div>
+    <div class="lotus">🪷</div>
+  </div>
+
+  <main id="app" aria-live="polite"><!-- màn hình render bởi app.js --></main>
+
+  <div id="confetti-layer" aria-hidden="true"></div>
+
+  <!-- Nút "cài app": chỉ hiện khi trình duyệt cho phép cài (beforeinstallprompt) -->
+  <button id="install-fab" class="install-fab" hidden>📲 Cài Long Nhí vào máy</button>
+
+  <script src="videos.js"></script>
+  <script src="data.js"></script>
+  <script src="license.js"></script>
+  <script src="progress.js"></script>
+  <script src="analytics.js"></script>
+  <script src="app.js"></script>
+
+  <script>
+    // Đăng ký service worker — CẬP NHẬT TỰ ĐỘNG, ÊM (không toast, không kẹt).
+    // Cơ chế: SW mới skipWaiting() (trong sw.js) → chiếm quyền ngay → controllerchange
+    // → trang tự reload đúng 1 lần để dùng bản mới. Không còn "waiting" nên hết lặp báo mới.
+    if ("serviceWorker" in navigator) {
+      // Chỉ reload khi ĐÃ có controller từ trước (đây là UPDATE, không phải cài lần đầu).
+      var hadController = !!navigator.serviceWorker.controller;
+      var reloaded = false;
+      navigator.serviceWorker.addEventListener("controllerchange", function () {
+        if (reloaded || !hadController) return;
+        reloaded = true;
+        window.location.reload();
+      });
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("sw.js").catch(function () {});
+      });
+    }
+  </script>
+</body>
+</html>
